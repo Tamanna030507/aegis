@@ -1,0 +1,21 @@
+{
+  "patient_id": "0047",
+  "procedure_type": "robotic_laparoscopic_colectomy",
+  "procedure_date": "2026-06-01",
+  "robot_model": "da_vinci_xi",
+  "operator_id": "surgeon_NU_04",
+  "tissue_resistance_index": 1.14,
+  "suture_tension_score": 2.3,
+  "blood_loss_ml": 180,
+  "procedure_duration_min": 142,
+  "irrigation_events": 3,
+  "retraction_events": 1,
+  "anomaly_flags": ["minor_retraction_event"],
+  "intraop_temp_min": 36.4,
+  "intraop_temp_max": 37.1,
+  "anastomosis_integrity_score": 0.91,
+  "bowel_handling_score": 0.88,
+  "co2_pressure_mean_mmhg": 14.2,
+  "blood_loss_class": "minimal",
+  "healing_prediction": "class_ii_moderate"
+}

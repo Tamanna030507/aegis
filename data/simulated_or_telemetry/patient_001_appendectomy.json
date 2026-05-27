@@ -1,0 +1,21 @@
+{
+  "patient_id": "0001",
+  "procedure_type": "robotic_appendectomy",
+  "procedure_date": "2026-05-28",
+  "robot_model": "medtronic_hugo",
+  "operator_id": "surgeon_NU_02",
+  "tissue_resistance_index": 0.96,
+  "suture_tension_score": 1.8,
+  "blood_loss_ml": 90,
+  "procedure_duration_min": 68,
+  "irrigation_events": 1,
+  "retraction_events": 0,
+  "anomaly_flags": [],
+  "intraop_temp_min": 36.6,
+  "intraop_temp_max": 36.9,
+  "anastomosis_integrity_score": 0.97,
+  "bowel_handling_score": 0.94,
+  "co2_pressure_mean_mmhg": 12.8,
+  "blood_loss_class": "minimal",
+  "healing_prediction": "class_i_primary"
+}

@@ -1,0 +1,36 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./aegis.db:/app/aegis.db
+      - ./static:/app/static
+    env_file: .env
+    restart: unless-stopped
+
+  patient-app:
+    build:
+      context: ./frontend/patient-app
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
+    depends_on:
+      - backend
+
+  physician-dashboard:
+    build:
+      context: ./frontend/physician-dashboard
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3001:80"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
+    depends_on:
+      - backend
