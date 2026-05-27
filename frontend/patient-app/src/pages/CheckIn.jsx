@@ -263,126 +263,132 @@ export default function AegisClinicalTimelinePortal() {
   };
 
   return (
-    <div style={{ background: '#0a0e17', color: '#f3f4f6', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.06)', maxWidth: '480px', margin: '0 auto', fontFamily: 'system-ui, sans-serif', boxSizing: 'border-box' }}>
+    <div style={{ background: 'var(--glass)', color: 'var(--text)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border)', maxWidth: '1000px', margin: '0 auto', fontFamily: 'system-ui, sans-serif', boxSizing: 'border-box', backdropFilter: 'blur(24px)' }}>
       
       {/* GLOBAL SYSTEM HEADER */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', paddingBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', paddingBottom: '10px', borderBottom: '1px solid var(--border)' }}>
         <div>
-          <span style={{ fontSize: '0.65rem', color: '#00e5c3', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 700, fontFamily: 'monospace' }}>AEGIS LONGITUDINAL SYSTEM</span>
-          <h2 style={{ margin: '2px 0 0 0', fontSize: '1.25rem', fontWeight: 800, color: '#fff' }}>Patient Clinical Portal</h2>
+          <span style={{ fontSize: '0.65rem', color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 700, fontFamily: 'monospace' }}>AEGIS LONGITUDINAL SYSTEM</span>
+          <h2 style={{ margin: '2px 0 0 0', fontSize: '1.25rem', fontWeight: 800, color: 'var(--text)' }}>Patient Clinical Portal</h2>
         </div>
-        <div style={{ fontSize: '0.72rem', color: '#9ca3af', background: '#111827', padding: '4px 10px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>ID: #984-PX</div>
+        <div style={{ fontSize: '0.72rem', color: 'var(--text2)', background: 'var(--bg3)', padding: '4px 10px', borderRadius: '20px', border: '1px solid var(--border)' }}>ID: #984-PX</div>
       </div>
 
       {/* PRIMARY VIEWS CONTROLLER - ORDER SWITCHED */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr 1fr', gap: '6px', marginBottom: '16px' }}>
-        <button onClick={() => setCurrentView('new_entry')} style={{ background: currentView === 'new_entry' ? '#1f2937' : '#111827', color: currentView === 'new_entry' ? '#00e5c3' : '#9ca3af', border: '1px solid rgba(255,255,255,0.05)', padding: '10px 4px', borderRadius: '8px', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}>Log Check-In</button>
-        <button onClick={() => setCurrentView('dashboard')} style={{ background: currentView === 'dashboard' ? '#1f2937' : '#111827', color: currentView === 'dashboard' ? '#00e5c3' : '#9ca3af', border: '1px solid rgba(255,255,255,0.05)', padding: '10px 4px', borderRadius: '8px', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}>Recovery History</button>
-        <button onClick={() => setCurrentView('neuro_assay')} style={{ background: currentView === 'neuro_assay' ? '#1f2937' : '#111827', color: currentView === 'neuro_assay' ? '#00e5c3' : '#9ca3af', border: '1px solid rgba(255,255,255,0.05)', padding: '10px 4px', borderRadius: '8px', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}>Motor Assay</button>
+        <button onClick={() => setCurrentView('new_entry')} style={{ background: currentView === 'new_entry' ? 'var(--bg3)' : 'var(--bg2)', color: currentView === 'new_entry' ? 'var(--teal)' : 'var(--text3)', border: '1px solid var(--border)', padding: '10px 4px', borderRadius: '8px', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}>Log Check-In</button>
+        <button onClick={() => setCurrentView('dashboard')} style={{ background: currentView === 'dashboard' ? 'var(--bg3)' : 'var(--bg2)', color: currentView === 'dashboard' ? 'var(--teal)' : 'var(--text3)', border: '1px solid var(--border)', padding: '10px 4px', borderRadius: '8px', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}>Recovery History</button>
+        <button onClick={() => setCurrentView('neuro_assay')} style={{ background: currentView === 'neuro_assay' ? 'var(--bg3)' : 'var(--bg2)', color: currentView === 'neuro_assay' ? 'var(--teal)' : 'var(--text3)', border: '1px solid var(--border)', padding: '10px 4px', borderRadius: '8px', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}>Motor Assay</button>
       </div>
 
       {/* ========================================================================
          VIEW A: DYNAMIC COMPREHENSIVE DAILY ENTRY WORKSPACE (NOW DEFAULT TAB)
          ======================================================================== */}
       {currentView === 'new_entry' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div className="checkin-grid-layout">
           
-          {/* STEP 1: COMPREHENSIVE SYMPTOM DICTIONARY MANIFEST */}
-          <div style={{ background: '#111827', padding: '12px', borderRadius: '10px' }}>
-            <h4 style={{ margin: '0 0 2px 0', fontSize: '0.8rem', color: '#fff' }}>1. System Symptom Dictionary</h4>
-            <p style={{ margin: '0 0 10px 0', fontSize: '0.65rem', color: '#9ca3af' }}>Select all current physiological anomalies to evaluate risk triage trends.</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', maxHeight: '130px', overflowY: 'auto', paddingRight: '4px' }}>
-              {SYMPTOM_DICT.map(sym => {
-                const isActive = selectedSymptoms.includes(sym.id);
-                return (
-                  <div key={sym.id} onClick={() => toggleSymptomElement(sym.id)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', background: isActive ? 'rgba(0, 229, 195, 0.05)' : '#1f2937', border: isActive ? '1px solid #00e5c3' : '1px solid transparent', borderRadius: '6px', cursor: 'pointer', transition: 'all 0.1s' }}>
-                    <span style={{ fontSize: '0.72rem', color: isActive ? '#00e5c3' : '#fff' }}>{sym.label}</span>
-                    <span style={{ fontSize: '0.55rem', textTransform: 'uppercase', padding: '2px 5px', borderRadius: '4px', background: sym.tier === 'critical' ? 'rgba(255,77,109,0.15)' : 'rgba(255,255,255,0.05)', color: sym.tier === 'critical' ? '#ff4d6d' : '#9ca3af' }}>{sym.tier}</span>
+          {/* COLUMN 1: SYMPTOMS & INGESTIONS */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {/* STEP 1: COMPREHENSIVE SYMPTOM DICTIONARY MANIFEST */}
+            <div style={{ background: 'var(--bg2)', border: '1px solid var(--border)', padding: '12px', borderRadius: '10px' }}>
+              <h4 style={{ margin: '0 0 2px 0', fontSize: '0.8rem', color: 'var(--text)' }}>1. System Symptom Dictionary</h4>
+              <p style={{ margin: '0 0 10px 0', fontSize: '0.65rem', color: 'var(--text2)' }}>Select all current physiological anomalies to evaluate risk triage trends.</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', maxHeight: '180px', overflowY: 'auto', paddingRight: '4px' }}>
+                {SYMPTOM_DICT.map(sym => {
+                  const isActive = selectedSymptoms.includes(sym.id);
+                  return (
+                    <div key={sym.id} onClick={() => toggleSymptomElement(sym.id)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', background: isActive ? 'rgba(0, 229, 195, 0.08)' : 'var(--bg3)', border: isActive ? '1px solid var(--teal)' : '1px solid var(--border)', borderRadius: '6px', cursor: 'pointer', transition: 'all 0.1s' }}>
+                      <span style={{ fontSize: '0.72rem', color: isActive ? 'var(--teal)' : 'var(--text)' }}>{sym.label}</span>
+                      <span style={{ fontSize: '0.55rem', textTransform: 'uppercase', padding: '2px 5px', borderRadius: '4px', background: sym.tier === 'critical' ? 'rgba(255,77,109,0.15)' : 'rgba(255,255,255,0.05)', color: sym.tier === 'critical' ? '#ff4d6d' : '#9ca3af' }}>{sym.tier}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* STEP 2: MEDICATION MANIFEST LOAD SYNC */}
+            <div style={{ background: 'var(--bg2)', border: '1px solid var(--border)', padding: '12px', borderRadius: '10px' }}>
+              <h4 style={{ margin: '0 0 2px 0', fontSize: '0.8rem', color: 'var(--text)' }}>2. Active Ingestion Logs</h4>
+              <p style={{ margin: '0 0 10px 0', fontSize: '0.65rem', color: 'var(--text2)' }}>Log active chemical compounds to analyze metabolic interference risks.</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '4px' }}>
+                {MEDICATION_DICT.map(med => {
+                  const isTaken = selectedMeds.includes(med.id);
+                  return (
+                    <div key={med.id} onClick={() => toggleMedicationElement(med.id)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', background: isTaken ? 'rgba(0, 229, 195, 0.08)' : 'var(--bg3)', border: isTaken ? '1px solid var(--teal)' : '1px solid var(--border)', borderRadius: '6px', cursor: 'pointer' }}>
+                      <span style={{ fontSize: '0.72rem', color: isTaken ? 'var(--teal)' : 'var(--text)' }}>{med.name}</span>
+                      <div style={{ width: '12px', height: '12px', borderRadius: '3px', border: '1px solid var(--border2)', background: isTaken ? 'var(--teal)' : 'transparent' }} />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* COLUMN 2: PAIN severity, BIOMETRICS, AND COGNITIVE JOURNAL */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {/* STEP 3: PAIN MATRIX TRACKER */}
+            <div style={{ background: 'var(--bg2)', border: '1px solid var(--border)', padding: '12px', borderRadius: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', marginBottom: '4px' }}>
+                <span style={{ color: 'var(--text)', fontWeight: 600 }}>3. Pain Intensity Configuration</span>
+                <span style={{ color: 'var(--teal)', fontFamily: 'monospace', fontWeight: 700 }}>{currentSeverity} / 10</span>
+              </div>
+              <input type="range" min="1" max="10" value={currentSeverity} onChange={(e) => setCurrentSeverity(Number(e.target.value))} style={{ width: '100%', accentColor: 'var(--teal)', background: 'var(--bg3)' }} />
+            </div>
+
+            {/* ASYNC PIPELINE MODULES (ACOUSTICS & TELEMETRY IMAGING) */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              
+              {/* ACOUSTIC COMPLIANCE LAYER */}
+              <div style={{ background: 'var(--bg2)', border: '1px solid var(--border)', padding: '10px', borderRadius: '10px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text)', display: 'block', marginBottom: '4px' }}>Vocal Vitals</span>
+                <button onClick={runVocalAcoustics} disabled={isRecording} style={{ background: isRecording ? 'var(--red)' : 'var(--bg3)', border: '1px solid var(--border)', color: isRecording ? '#fff' : 'var(--teal)', padding: '6px', borderRadius: '6px', fontSize: '0.65rem', fontWeight: 700, cursor: 'pointer' }}>
+                  {isRecording ? 'Sampling...' : 'Record Airway'}
+                </button>
+                {isRecording && (
+                  <div style={{ display: 'flex', gap: '1px', height: '12px', alignItems: 'center', marginTop: '6px' }}>
+                    {audioWaves.slice(0, 10).map((w, i) => <div key={i} style={{ flex: 1, height: `${w}%`, background: 'var(--teal)' }} />)}
                   </div>
-                );
-              })}
+                )}
+                {lungVerification && <div style={{ fontSize: '0.58rem', color: 'var(--text2)', marginTop: '6px', lineHeight: '1.2' }}>✓ Verified: {lungVerification.complianceScore}</div>}
+              </div>
+
+              {/* TELEMETRY IMAGING LAYER */}
+              <div style={{ background: 'var(--bg2)', border: '1px solid var(--border)', padding: '10px', borderRadius: '10px' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text)', display: 'block', marginBottom: '4px' }}>CV Incision Telemetry</span>
+                <label style={{ display: 'block', background: 'var(--bg3)', border: '1px solid var(--border)', color: 'var(--text)', padding: '6px', borderRadius: '6px', fontSize: '0.65rem', fontWeight: 700, textAlign: 'center', cursor: 'pointer' }}>
+                  {processingPhoto ? 'Analyzing...' : uploadedPhoto ? 'Re-upload Image' : 'Capture Photo'}
+                  <input type="file" accept="image/*" onChange={runCameraTelemetry} style={{ display: 'none' }} />
+                </label>
+                {cvAnalysis && <div style={{ fontSize: '0.58rem', color: 'var(--purple)', marginTop: '6px', lineHeight: '1.2' }}>✓ Apposition: {cvAnalysis.apposition}</div>}
+              </div>
+
             </div>
+
+            {/* LINGUISTIC COHERENCE WRITER */}
+            <div style={{ background: 'var(--bg2)', border: '1px solid var(--border)', padding: '12px', borderRadius: '10px' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text)', display: 'block', marginBottom: '4px' }}>Patient Cognitive Journal Entry</span>
+              <textarea value={journalText} onChange={(e) => setJournalText(e.target.value)} placeholder="Type how you feel. System maps syntax scattering vectors down to the baseline..." style={{ width: '100%', boxSizing: 'border-box', background: 'var(--bg3)', border: '1px solid var(--border)', borderRadius: '6px', padding: '6px', color: 'var(--text)', fontSize: '0.72rem', minHeight: '45px', resize: 'none' }} />
+            </div>
+
+            {/* CRITICAL ENGINE COMPUTATION BREAKOUTS */}
+            {liveTriageMatrix && (
+              <div style={{ background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '8px', borderLeft: `3px solid ${liveTriageMatrix.color}`, fontSize: '0.68rem' }}>
+                <div style={{ color: liveTriageMatrix.color, fontWeight: 900, fontSize: '0.62rem', letterSpacing: '1px' }}>{liveTriageMatrix.banner}</div>
+                <p style={{ margin: '2px 0 0 0', color: '#e5e7eb', lineHeight: '1.3' }}>{liveTriageMatrix.text}</p>
+              </div>
+            )}
+
+            {pharmaConflictAlert && (
+              <div style={{ background: 'rgba(255, 77, 109, 0.08)', border: '1px solid #ff4d6d', padding: '10px', borderRadius: '8px', color: '#fff', fontSize: '0.68rem', lineHeight: '1.35' }}>
+                {pharmaConflictAlert}
+              </div>
+            )}
+
+            {/* TRANSACTION COMMIT TRIGGER BUTTON */}
+            <button onClick={commitDailyLogEntry} disabled={selectedSymptoms.length === 0} style={{ width: '100%', background: selectedSymptoms.length === 0 ? '#374151' : '#00e5c3', color: selectedSymptoms.length === 0 ? '#9ca3af' : '#000', border: 'none', padding: '12px', borderRadius: '8px', fontWeight: 800, fontSize: '0.78rem', cursor: selectedSymptoms.length === 0 ? 'not-allowed' : 'pointer', transition: 'all 0.15s' }}>
+              Commit Package Entry to Recovery History
+            </button>
           </div>
-
-          {/* STEP 2: MEDICATION MANIFEST LOAD SYNC */}
-          <div style={{ background: '#111827', padding: '12px', borderRadius: '10px' }}>
-            <h4 style={{ margin: '0 0 2px 0', fontSize: '0.8rem', color: '#fff' }}>2. Active Ingestion Logs</h4>
-            <p style={{ margin: '0 0 10px 0', fontSize: '0.65rem', color: '#9ca3af' }}>Log active chemical compounds to analyze metabolic interference risks.</p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '4px' }}>
-              {MEDICATION_DICT.map(med => {
-                const isTaken = selectedMeds.includes(med.id);
-                return (
-                  <div key={med.id} onClick={() => toggleMedicationElement(med.id)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', background: isTaken ? 'rgba(0, 229, 195, 0.04)' : '#1f2937', border: isTaken ? '1px solid #00e5c3' : '1px solid transparent', borderRadius: '6px', cursor: 'pointer' }}>
-                    <span style={{ fontSize: '0.72rem', color: isTaken ? '#00e5c3' : '#e5e7eb' }}>{med.name}</span>
-                    <div style={{ width: '12px', height: '12px', borderRadius: '3px', border: '1px solid #4b5563', background: isTaken ? '#00e5c3' : 'transparent' }} />
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* STEP 3: PAIN MATRIX TRACKER */}
-          <div style={{ background: '#111827', padding: '12px', borderRadius: '10px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', marginBottom: '4px' }}>
-              <span style={{ color: '#fff', fontWeight: 600 }}>3. Pain Intensity Configuration</span>
-              <span style={{ color: '#00e5c3', fontFamily: 'monospace', fontWeight: 700 }}>{currentSeverity} / 10</span>
-            </div>
-            <input type="range" min="1" max="10" value={currentSeverity} onChange={(e) => setCurrentSeverity(Number(e.target.value))} style={{ width: '100%', accentColor: '#00e5c3', background: '#1f2937' }} />
-          </div>
-
-          {/* ASYNC PIPELINE MODULES (ACOUSTICS & TELEMETRY IMAGING) */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-            
-            {/* ACOUSTIC COMPLIANCE LAYER */}
-            <div style={{ background: '#111827', padding: '10px', borderRadius: '10px', display: 'flex', flexDirection: 'column', justifyContent: 'between' }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#fff', display: 'block', marginBottom: '4px' }}>Vocal Vitals</span>
-              <button onClick={runVocalAcoustics} disabled={isRecording} style={{ background: isRecording ? '#ff4d6d' : '#1f2937', border: '1px solid rgba(255,255,255,0.1)', color: isRecording ? '#fff' : '#00e5c3', padding: '6px', borderRadius: '6px', fontSize: '0.65rem', fontWeight: 700, cursor: 'pointer' }}>
-                {isRecording ? 'Sampling...' : 'Record Airway'}
-              </button>
-              {isRecording && (
-                <div style={{ display: 'flex', gap: '1px', height: '12px', alignItems: 'center', marginTop: '6px' }}>
-                  {audioWaves.slice(0, 10).map((w, i) => <div key={i} style={{ flex: 1, height: `${w}%`, background: '#00e5c3' }} />)}
-                </div>
-              )}
-              {lungVerification && <div style={{ fontSize: '0.58rem', color: '#9ca3af', marginTop: '6px', lineHeight: '1.2' }}>✓ Verified: {lungVerification.complianceScore}</div>}
-            </div>
-
-            {/* TELEMETRY IMAGING LAYER */}
-            <div style={{ background: '#111827', padding: '10px', borderRadius: '10px' }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#fff', display: 'block', marginBottom: '4px' }}>CV Incision Telemetry</span>
-              <label style={{ display: 'block', background: '#1f2937', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '6px', borderRadius: '6px', fontSize: '0.65rem', fontWeight: 700, textAlign: 'center', cursor: 'pointer' }}>
-                {processingPhoto ? 'Analyzing...' : uploadedPhoto ? 'Re-upload Image' : 'Capture Photo'}
-                <input type="file" accept="image/*" onChange={runCameraTelemetry} style={{ display: 'none' }} />
-              </label>
-              {cvAnalysis && <div style={{ fontSize: '0.58rem', color: '#b48ead', marginTop: '6px', lineHeight: '1.2' }}>✓ Apposition: {cvAnalysis.apposition}</div>}
-            </div>
-
-          </div>
-
-          {/* LINGUISTIC COHERENCE WRITER */}
-          <div style={{ background: '#111827', padding: '12px', borderRadius: '10px' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#fff', display: 'block', marginBottom: '4px' }}>Patient Cognitive Journal Entry</span>
-            <textarea value={journalText} onChange={(e) => setJournalText(e.target.value)} placeholder="Type how you feel. System maps syntax scattering vectors down to the baseline..." style={{ width: '100%', boxSizing: 'border-box', background: '#1f2937', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', padding: '6px', color: '#fff', fontSize: '0.72rem', minHeight: '45px', resize: 'none' }} />
-          </div>
-
-          {/* CRITICAL ENGINE COMPUTATION BREAKOUTS */}
-          {liveTriageMatrix && (
-            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '8px', borderLeft: `3px solid ${liveTriageMatrix.color}`, fontSize: '0.68rem' }}>
-              <div style={{ color: liveTriageMatrix.color, fontWeight: 900, fontSize: '0.62rem', letterSpacing: '1px' }}>{liveTriageMatrix.banner}</div>
-              <p style={{ margin: '2px 0 0 0', color: '#e5e7eb', lineHeight: '1.3' }}>{liveTriageMatrix.text}</p>
-            </div>
-          )}
-
-          {pharmaConflictAlert && (
-            <div style={{ background: 'rgba(255, 77, 109, 0.08)', border: '1px solid #ff4d6d', padding: '10px', borderRadius: '8px', color: '#fff', fontSize: '0.68rem', lineHeight: '1.35' }}>
-              {pharmaConflictAlert}
-            </div>
-          )}
-
-          {/* TRANSACTION COMMIT TRIGGER BUTTON */}
-          <button onClick={commitDailyLogEntry} disabled={selectedSymptoms.length === 0} style={{ width: '100%', background: selectedSymptoms.length === 0 ? '#374151' : '#00e5c3', color: selectedSymptoms.length === 0 ? '#9ca3af' : '#000', border: 'none', padding: '12px', borderRadius: '8px', fontWeight: 800, fontSize: '0.78rem', cursor: selectedSymptoms.length === 0 ? 'not-allowed' : 'pointer', transition: 'all 0.15s' }}>
-            Commit Package Entry to Recovery History
-          </button>
 
         </div>
       )}
@@ -393,29 +399,29 @@ export default function AegisClinicalTimelinePortal() {
       {currentView === 'dashboard' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ margin: 0, fontSize: '0.9rem', color: '#fff', fontWeight: 700 }}>Continuous Patient Progress Log</h3>
-            <button onClick={() => setCurrentView('new_entry')} style={{ background: 'rgba(0, 229, 195, 0.1)', color: '#00e5c3', border: '1px dashed #00e5c3', padding: '4px 10px', borderRadius: '6px', fontSize: '0.68rem', fontWeight: 700, cursor: 'pointer' }}>+ Append Today</button>
+            <h3 style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text)', fontWeight: 700 }}>Continuous Patient Progress Log</h3>
+            <button onClick={() => setCurrentView('new_entry')} style={{ background: 'rgba(0, 229, 195, 0.1)', color: 'var(--teal)', border: '1px dashed var(--teal)', padding: '4px 10px', borderRadius: '6px', fontSize: '0.68rem', fontWeight: 700, cursor: 'pointer' }}>+ Append Today</button>
           </div>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div className="history-grid">
             {patientHistory.map((record, index) => (
-              <div key={index} style={{ background: '#111827', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '10px', padding: '12px', position: 'relative' }}>
+              <div key={index} style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: '10px', padding: '12px', position: 'relative' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#fff' }}>{record.day}</span>
-                  <span style={{ fontSize: '0.65rem', color: '#6b7280', fontFamily: 'monospace' }}>{record.date}</span>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text)' }}>{record.day}</span>
+                  <span style={{ fontSize: '0.65rem', color: 'var(--text3)', fontFamily: 'monospace' }}>{record.date}</span>
                 </div>
                 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '8px' }}>
                   {record.symptoms.map((sym, sIdx) => (
-                    <span key={sIdx} style={{ fontSize: '0.62rem', background: 'rgba(255,255,255,0.04)', color: '#9ca3af', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.02)' }}>{sym}</span>
+                    <span key={sIdx} style={{ fontSize: '0.62rem', background: 'var(--bg3)', color: 'var(--text2)', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border)' }}>{sym}</span>
                   ))}
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '0.68rem', borderTop: '1px solid rgba(255,255,255,0.03)', paddingTop: '6px', color: '#9ca3af' }}>
-                  <div>Pain Index: <strong style={{ color: record.severity >= 7 ? '#ff4d6d' : '#fff' }}>{record.severity}/10</strong></div>
-                  <div>Spirometry Parity: <strong style={{ color: '#fff' }}>{record.compliance}</strong></div>
-                  <div>Cognitive Assessment: <strong style={{ color: '#fff' }}>{record.cognitive}</strong></div>
-                  <div>Triage Vector: <strong style={{ color: '#00e5c3' }}>{record.status}</strong></div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '0.68rem', borderTop: '1px solid var(--border)', paddingTop: '6px', color: 'var(--text2)' }}>
+                  <div>Pain Index: <strong style={{ color: record.severity >= 7 ? 'var(--red)' : 'var(--text)' }}>{record.severity}/10</strong></div>
+                  <div>Spirometry Parity: <strong style={{ color: 'var(--text)' }}>{record.compliance}</strong></div>
+                  <div>Cognitive Assessment: <strong style={{ color: 'var(--text)' }}>{record.cognitive}</strong></div>
+                  <div>Triage Vector: <strong style={{ color: 'var(--teal)' }}>{record.status}</strong></div>
                 </div>
               </div>
             ))}
@@ -427,22 +433,22 @@ export default function AegisClinicalTimelinePortal() {
          VIEW C: ENHANCED NEURO-MOTOR KINETIC TIMING CALIBRATOR (WITH JUDGE ADDITIONS)
          ======================================================================== */}
       {currentView === 'neuro_assay' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div className="motor-grid-layout">
           
           {/* TAP INTERFACES SUB-MODULE */}
-          <div style={{ background: '#111827', padding: '14px', borderRadius: '12px' }}>
+          <div style={{ background: 'var(--bg2)', border: '1px solid var(--border)', padding: '14px', borderRadius: '12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-              <h4 style={{ margin: 0, fontSize: '0.85rem', color: '#fff' }}>Neuro-Kinetic Precision Assay</h4>
-              <span style={{ fontSize: '0.6rem', color: '#ffb703', background: 'rgba(255,183,3,0.1)', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>DSP CORE</span>
+              <h4 style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text)' }}>Neuro-Kinetic Precision Assay</h4>
+              <span style={{ fontSize: '0.6rem', color: 'var(--amber)', background: 'rgba(255,183,3,0.1)', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>DSP CORE</span>
             </div>
-            <p style={{ margin: '0 0 12px 0', fontSize: '0.68rem', color: '#9ca3af', lineHeight: '1.35' }}>Measures kinetic rhythm jitter variance down to the millisecond (ms) to gauge processing degradation and motor-control fatigue.</p>
+            <p style={{ margin: '0 0 12px 0', fontSize: '0.68rem', color: 'var(--text2)', lineHeight: '1.35' }}>Measures kinetic rhythm jitter variance down to the millisecond (ms) to gauge processing degradation and motor-control fatigue.</p>
 
             {/* NEW ENHANCEMENT: METRONOME SPEED MODIFIER TARGET */}
-            <div style={{ background: '#1f2937', padding: '8px 12px', borderRadius: '8px', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.68rem', color: '#e5e7eb' }}>Metronome Pace Target:</span>
+            <div style={{ background: 'var(--bg3)', border: '1px solid var(--border)', padding: '8px 12px', borderRadius: '8px', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.68rem', color: 'var(--text)' }}>Metronome Pace Target:</span>
               <div style={{ display: 'flex', gap: '6px' }}>
                 {[90, 120, 160].map(bpm => (
-                  <button key={bpm} onClick={() => !isAssayRunning && setAssayTargetBpm(bpm)} style={{ background: assayTargetBpm === bpm ? '#00e5c3' : '#111827', color: assayTargetBpm === bpm ? '#000' : '#fff', border: 'none', padding: '3px 8px', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 700, cursor: isAssayRunning ? 'not-allowed' : 'pointer' }}>
+                  <button key={bpm} onClick={() => !isAssayRunning && setAssayTargetBpm(bpm)} style={{ background: assayTargetBpm === bpm ? 'var(--teal)' : 'var(--bg2)', color: assayTargetBpm === bpm ? 'var(--bg)' : 'var(--text)', border: 'none', padding: '3px 8px', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 700, cursor: isAssayRunning ? 'not-allowed' : 'pointer' }}>
                     {bpm} BPM
                   </button>
                 ))}
@@ -450,17 +456,17 @@ export default function AegisClinicalTimelinePortal() {
             </div>
 
             {!isAssayRunning ? (
-              <button onClick={startNeuralCalibrator} style={{ width: '100%', background: '#00e5c3', color: '#000', border: 'none', padding: '10px', borderRadius: '6px', fontWeight: 800, fontSize: '0.75rem', cursor: 'pointer' }}>
+              <button onClick={startNeuralCalibrator} style={{ width: '100%', background: 'var(--teal)', color: 'var(--bg)', border: 'none', padding: '10px', borderRadius: '6px', fontWeight: 800, fontSize: '0.75rem', cursor: 'pointer' }}>
                 {finalAssayReport ? 'Restart Dynamic Sync Check' : 'Initialize 5s Neuro-Assay'}
               </button>
             ) : (
               <div>
-                <div style={{ textAlign: 'center', fontSize: '0.75rem', color: '#ffb703', fontWeight: 700, marginBottom: '10px', fontFamily: 'monospace' }}>CALIBRATION TIMEFRAME: 0{assayCountdown}s</div>
+                <div style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--amber)', fontWeight: 700, marginBottom: '10px', fontFamily: 'monospace' }}>CALIBRATION TIMEFRAME: 0{assayCountdown}s</div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', height: '85px' }}>
-                  <button onClick={() => registerPadImpulse('A')} style={{ background: activePad === 'A' ? 'rgba(0, 229, 195, 0.15)' : '#1f2937', border: activePad === 'A' ? '2px solid #00e5c3' : '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', color: '#fff', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer', userSelect: 'none' }}>
+                  <button onClick={() => registerPadImpulse('A')} style={{ background: activePad === 'A' ? 'rgba(0, 229, 195, 0.15)' : 'var(--bg3)', border: activePad === 'A' ? '2px solid var(--teal)' : '1px solid var(--border)', borderRadius: '8px', color: 'var(--text)', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer', userSelect: 'none' }}>
                     {activePad === 'A' ? 'CLICK TARGET' : 'LOCK'}
                   </button>
-                  <button onClick={() => registerPadImpulse('B')} style={{ background: activePad === 'B' ? 'rgba(0, 229, 195, 0.15)' : '#1f2937', border: activePad === 'B' ? '2px solid #00e5c3' : '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', color: '#fff', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer', userSelect: 'none' }}>
+                  <button onClick={() => registerPadImpulse('B')} style={{ background: activePad === 'B' ? 'rgba(0, 229, 195, 0.15)' : 'var(--bg3)', border: activePad === 'B' ? '2px solid var(--teal)' : '1px solid var(--border)', borderRadius: '8px', color: 'var(--text)', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer', userSelect: 'none' }}>
                     {activePad === 'B' ? 'CLICK TARGET' : 'LOCK'}
                   </button>
                 </div>
@@ -468,37 +474,37 @@ export default function AegisClinicalTimelinePortal() {
             )}
 
             {finalAssayReport && (
-              <div style={{ marginTop: '12px', background: 'rgba(0,0,0,0.25)', padding: '10px', borderRadius: '8px', fontSize: '0.7rem', display: 'flex', flexDirection: 'column', gap: '3px', borderLeft: '2px solid #ffb703' }}>
-                <div><span style={{ color: '#9ca3af' }}>Timing Drift Jitter:</span> <strong style={{ color: '#fff', fontFamily: 'monospace' }}>{finalAssayReport.variance}</strong></div>
-                <div><span style={{ color: '#9ca3af' }}>Pace Tracking Deviation:</span> <strong style={{ color: '#00e5c3' }}>{finalAssayReport.index}</strong></div>
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '4px', marginTop: '4px', color: '#cbd5e1', fontStyle: 'italic' }}>{finalAssayReport.rating}</div>
+              <div style={{ marginTop: '12px', background: 'var(--bg3)', border: '1px solid var(--border)', padding: '10px', borderRadius: '8px', fontSize: '0.7rem', display: 'flex', flexDirection: 'column', gap: '3px', borderLeft: '2px solid var(--amber)' }}>
+                <div><span style={{ color: 'var(--text2)' }}>Timing Drift Jitter:</span> <strong style={{ color: 'var(--text)', fontFamily: 'monospace' }}>{finalAssayReport.variance}</strong></div>
+                <div><span style={{ color: 'var(--text2)' }}>Pace Tracking Deviation:</span> <strong style={{ color: 'var(--teal)' }}>{finalAssayReport.index}</strong></div>
+                <div style={{ borderTop: '1px solid var(--border)', paddingTop: '4px', marginTop: '4px', color: 'var(--text2)', fontStyle: 'italic' }}>{finalAssayReport.rating}</div>
               </div>
             )}
           </div>
 
           {/* NEW ENHANCEMENT SUB-MODULE: RESTING MICRO-TREMOR GYROSCOPIC TESTING */}
-          <div style={{ background: '#111827', padding: '14px', borderRadius: '12px' }}>
-            <h4 style={{ margin: '0 0 2px 0', fontSize: '0.85rem', color: '#fff' }}>Postural Rest Tremor Analyzer</h4>
-            <p style={{ margin: '0 0 12px 0', fontSize: '0.68rem', color: '#9ca3af', lineHeight: '1.35' }}>Uses simulated acceleration coordinate streams to identify high-frequency somatic micro-oscillations indicative of anesthesia wear-off anomalies.</p>
+          <div style={{ background: 'var(--bg2)', border: '1px solid var(--border)', padding: '14px', borderRadius: '12px' }}>
+            <h4 style={{ margin: '0 0 2px 0', fontSize: '0.85rem', color: 'var(--text)' }}>Postural Rest Tremor Analyzer</h4>
+            <p style={{ margin: '0 0 12px 0', fontSize: '0.68rem', color: 'var(--text2)', lineHeight: '1.35' }}>Uses simulated acceleration coordinate streams to identify high-frequency somatic micro-oscillations indicative of anesthesia wear-off anomalies.</p>
             
-            <div style={{ background: '#1f2937', padding: '12px', borderRadius: '8px', marginBottom: '10px' }}>
+            <div style={{ background: 'var(--bg3)', border: '1px solid var(--border)', padding: '12px', borderRadius: '8px', marginBottom: '10px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px', textAlign: 'center', fontFamily: 'monospace', fontSize: '0.75rem', marginBottom: '8px' }}>
-                <div><span style={{ color: '#9ca3af', display: 'block', fontSize: '0.6rem' }}>X-AXIS DELTA</span> <strong style={{ color: '#fff' }}>{tremorTelemetry.x} mm</strong></div>
-                <div><span style={{ color: '#9ca3af', display: 'block', fontSize: '0.6rem' }}>Y-AXIS DELTA</span> <strong style={{ color: '#fff' }}>{tremorTelemetry.y} mm</strong></div>
-                <div><span style={{ color: '#9ca3af', display: 'block', fontSize: '0.6rem' }}>EST FREQUENCY</span> <strong style={{ color: '#b48ead' }}>{tremorTelemetry.frequency} Hz</strong></div>
+                <div><span style={{ color: 'var(--text2)', display: 'block', fontSize: '0.6rem' }}>X-AXIS DELTA</span> <strong style={{ color: 'var(--text)' }}>{tremorTelemetry.x} mm</strong></div>
+                <div><span style={{ color: 'var(--text2)', display: 'block', fontSize: '0.6rem' }}>Y-AXIS DELTA</span> <strong style={{ color: 'var(--text)' }}>{tremorTelemetry.y} mm</strong></div>
+                <div><span style={{ color: 'var(--text2)', display: 'block', fontSize: '0.6rem' }}>EST FREQUENCY</span> <strong style={{ color: 'var(--purple)' }}>{tremorTelemetry.frequency} Hz</strong></div>
               </div>
               
               {/* Visual mini-graph boundary display */}
-              <div style={{ height: '30px', background: '#111827', borderRadius: '4px', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ height: '30px', background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: '4px', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {isTrackingTremor ? (
-                  <div style={{ width: '100%', height: '2px', background: 'linear-gradient(90deg, transparent, #b48ead, transparent)', transform: `translateY(${tremorTelemetry.x * 2}px)`, transition: 'transform 0.1s' }} />
+                  <div style={{ width: '100%', height: '2px', background: 'linear-gradient(90deg, transparent, var(--purple), transparent)', transform: `translateY(${tremorTelemetry.x * 2}px)`, transition: 'transform 0.1s' }} />
                 ) : (
-                  <span style={{ fontSize: '0.65rem', color: '#4b5563' }}>Sensor Engine Idle</span>
+                  <span style={{ fontSize: '0.65rem', color: 'var(--text3)' }}>Sensor Engine Idle</span>
                 )}
               </div>
             </div>
 
-            <button onClick={runTremorAssessment} disabled={isTrackingTremor} style={{ width: '100%', background: isTrackingTremor ? '#374151' : 'rgba(180, 142, 173, 0.15)', color: isTrackingTremor ? '#9ca3af' : '#b48ead', border: isTrackingTremor ? '1px solid transparent' : '1px solid #b48ead', padding: '8px', borderRadius: '6px', fontWeight: 700, fontSize: '0.72rem', cursor: isTrackingTremor ? 'not-allowed' : 'pointer' }}>
+            <button onClick={runTremorAssessment} disabled={isTrackingTremor} style={{ width: '100%', background: isTrackingTremor ? 'var(--bg3)' : 'rgba(180, 142, 173, 0.12)', color: isTrackingTremor ? 'var(--text3)' : 'var(--purple)', border: isTrackingTremor ? '1px solid transparent' : '1px solid var(--purple)', padding: '8px', borderRadius: '6px', fontWeight: 700, fontSize: '0.72rem', cursor: isTrackingTremor ? 'not-allowed' : 'pointer' }}>
               {isTrackingTremor ? 'Analyzing Stability Plane...' : 'Run Gyroscopic Posture Assay'}
             </button>
           </div>

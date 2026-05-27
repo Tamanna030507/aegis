@@ -7,6 +7,7 @@ import EvidenceBrief from './pages/EvidenceBrief';
 import PassportScanner from './pages/PassportScanner';
 import FederatedStatus from './components/FederatedStatus';
 import { useTheme } from './hooks/useTheme';
+import { useAuth } from './hooks/useAuth';
 
 const NAV = [
   { to: '/',          label: 'Risk Queue',       icon: '⚡', end: true },
@@ -16,7 +17,80 @@ const NAV = [
   { to: '/federated', label: 'Federated Network',icon: '🌐' },
 ];
 
-function Sidebar({ theme, toggleTheme }) {
+function AuthGuard({ children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        backgroundColor: '#071425',
+        color: '#60a5fa',
+        fontFamily: 'sans-serif'
+      }}>
+        <div style={{
+          width: '50px',
+          height: '50px',
+          borderRadius: '50%',
+          border: '2px solid rgba(96,165,250,0.15)',
+          borderTopColor: '#60a5fa',
+          animation: 'spin-auth 1s linear infinite'
+        }} />
+        <style dangerouslySetInnerHTML={{__html: `
+          @keyframes spin-auth { to { transform: rotate(360deg); } }
+        `}} />
+        <p style={{ marginTop: '20px', fontFamily: 'monospace', letterSpacing: '0.15em' }}>Loading AEGIS Session...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    window.location.href = import.meta.env.VITE_LOGIN_URL || "http://localhost:3007";
+    return null;
+  }
+
+  if (user.role !== 'physician') {
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        backgroundColor: '#071425',
+        color: '#ff4d6d',
+        fontFamily: 'monospace',
+        textAlign: 'center',
+        padding: '20px'
+      }}>
+        <h2 style={{ marginBottom: '10px' }}>⚠️ ACCESS DENIED</h2>
+        <p>This portal is reserved for physicians. Your account is registered as a {user.role}.</p>
+        <button 
+          onClick={() => { window.location.href = import.meta.env.VITE_LOGIN_URL || "http://localhost:3007" }}
+          style={{
+            marginTop: '20px',
+            padding: '10px 20px',
+            backgroundColor: '#ff4d6d',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer'
+          }}
+        >
+          Return to Login
+        </button>
+      </div>
+    );
+  }
+
+  return children;
+}
+
+function Sidebar({ theme, toggleTheme, user, logout }) {
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">
@@ -26,6 +100,16 @@ function Sidebar({ theme, toggleTheme }) {
           <div className="sidebar-logo-sub">PHYSICIAN DASHBOARD</div>
         </div>
       </div>
+
+      {user && (
+        <div style={{ padding: '12px 14px', background: 'rgba(96,165,250,0.06)', border: '1px solid rgba(96,165,250,0.15)', borderRadius: 10, marginBottom: 12 }}>
+          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>AUTHORIZED CLINICIAN</div>
+          <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginTop: 2, fontSize: '0.85rem' }}>
+            ⚕️ {user.name}
+          </div>
+        </div>
+      )}
+
       {NAV.map(n => (
         <NavLink key={n.to} to={n.to} end={n.end}
           className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
@@ -56,6 +140,34 @@ function Sidebar({ theme, toggleTheme }) {
         <span style={{ fontSize: '1rem' }}>{theme === 'dark' ? '☀️' : '🌙'}</span>
         {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
       </button>
+
+      {user && (
+        <button
+          onClick={logout}
+          title="Sign Out"
+          style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            width: '100%', padding: '10px 14px',
+            background: 'rgba(239, 68, 68, 0.08)',
+            border: '1px solid rgba(239, 68, 68, 0.25)',
+            borderRadius: 10, cursor: 'pointer',
+            color: '#ef4444',
+            fontSize: '0.85rem', fontWeight: 500,
+            fontFamily: 'inherit',
+            transition: 'all 0.2s',
+            marginBottom: 16,
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.08)'; }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Sign Out
+        </button>
+      )}
 
       <div style={{ padding: '12px 8px', borderTop: '1px solid var(--border)' }}>
         <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: 4 }}>AEGIS DEMO NODE</div>
@@ -92,14 +204,15 @@ function useEscalationWS(setToast) {
   }, [setToast]);
 }
 
-export default function App() {
+function AuthWrapper() {
   const { theme, toggle } = useTheme();
   const [escalationToast, setEscalationToast] = useState(null);
+  const { user, logout } = useAuth();
   useEscalationWS(setEscalationToast);
 
   return (
-    <BrowserRouter>
-      <Sidebar theme={theme} toggleTheme={toggle} />
+    <AuthGuard>
+      <Sidebar theme={theme} toggleTheme={toggle} user={user} logout={logout} />
       <main className="main">
         <Routes>
           <Route path="/"            element={<RiskQueue />} />
@@ -137,6 +250,14 @@ export default function App() {
           </button>
         </div>
       )}
+    </AuthGuard>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AuthWrapper />
     </BrowserRouter>
   );
 }

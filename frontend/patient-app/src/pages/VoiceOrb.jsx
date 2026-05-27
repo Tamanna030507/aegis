@@ -327,7 +327,12 @@ export default function VoiceOrb({ patientId = '0047', dayPostOp = 1 }) {
       }, 400);
 
       timerRef.current = setInterval(() => setSeconds(s => s + 1), 1000);
-      setConvoLog(log => [...log, { role: 'ai', text: questionText }]);
+      setConvoLog(log => {
+        if (log.length > 0 && log[log.length - 1].role === 'ai' && log[log.length - 1].text === questionText) {
+          return log;
+        }
+        return [...log, { role: 'ai', text: questionText }];
+      });
     } catch {
       setError('Microphone access denied. Please allow microphone access in browser settings.');
       setOrbState('idle');
@@ -556,6 +561,61 @@ export default function VoiceOrb({ patientId = '0047', dayPostOp = 1 }) {
     );
   }, [speak, startRecordingQuestion]);
 
+  const handlePreviousQuestion = useCallback(() => {
+    // Clear recording timers
+    clearInterval(timerRef.current);
+    clearInterval(featureTimer.current);
+
+    // Stop current media recorder safely
+    try {
+      if (recorderRef.current && recorderRef.current.state !== 'inactive') {
+        recorderRef.current.stop();
+      }
+    } catch (_) {}
+
+    // Reset voice synthesis
+    if ('speechSynthesis' in window) {
+      speechSynthesis.cancel();
+    }
+
+    const prevIndex = qIndex - 1;
+    if (prevIndex >= 0) {
+      // Step back in question index
+      setQIndex(prevIndex);
+      
+      // Trim convoLog to remove the last user and AI message
+      setConvoLog(log => {
+        const nextLog = [...log];
+        // Pop last user answer and last AI question
+        if (nextLog.length > 0 && nextLog[nextLog.length - 1].role === 'user') nextLog.pop();
+        if (nextLog.length > 0 && nextLog[nextLog.length - 1].role === 'ai') nextLog.pop();
+        return nextLog;
+      });
+
+      // Speak and start recording previous question
+      const prevQ = QUESTIONS[prevIndex];
+      setTimeout(() => speak(prevQ.text, () => startRecordingQuestion(prevQ.text, prevIndex === 0)), 700);
+    }
+  }, [qIndex, speak, startRecordingQuestion]);
+
+  const handleClosePanel = useCallback(() => {
+    // Reset all recording timers and states
+    clearInterval(timerRef.current);
+    clearInterval(featureTimer.current);
+    try { recorderRef.current?.stop(); } catch (_) {}
+    if (recognRef.current) {
+      recognRef.current._active = false;
+      recognActiveRef.current = false;
+      try { recognRef.current.stop(); } catch (_) {}
+    }
+    streamRef.current?.getTracks().forEach(t => t.stop());
+    try { audioCtxRef.current?.close(); } catch (_) {}
+    speechSynthesis.cancel();
+
+    setOrbState('idle');
+    setPanelOpen(false);
+  }, []);
+
   const handleOrbClick = () => {
     if (orbState === 'idle' || orbState === 'done') startConversation();
     else if (orbState === 'listening') stopAndAdvance();
@@ -648,7 +708,7 @@ export default function VoiceOrb({ patientId = '0047', dayPostOp = 1 }) {
           position: 'fixed', inset: 0, zIndex: 9998,
           background: 'rgba(5,8,16,0.65)', backdropFilter: 'blur(8px)',
           display: 'flex', alignItems: 'flex-end',
-        }} onClick={(e) => { if (e.target === e.currentTarget && orbState === 'done') setPanelOpen(false); }}>
+        }} onClick={(e) => { if (e.target === e.currentTarget) handleClosePanel(); }}>
           <div style={{
             width: '100%', maxWidth: 540, margin: '0 auto',
             background: 'var(--bg-card)', border: '1px solid var(--border)',
@@ -670,10 +730,8 @@ export default function VoiceOrb({ patientId = '0047', dayPostOp = 1 }) {
                       : `Question ${Math.min(qIndex + 1, QUESTIONS.length)} of ${QUESTIONS.length}`}
                   </p>
                 </div>
-                {orbState === 'done' && (
-                  <button onClick={() => setPanelOpen(false)}
-                    style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.1rem', padding: 4 }}>✕</button>
-                )}
+                <button onClick={handleClosePanel}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.1rem', padding: 4 }} title="Cancel Check-In">✕</button>
               </div>
               {orbState !== 'done' && (
                 <div style={{ height: 3, background: 'var(--bg-surface)', borderRadius: 2, marginTop: 10, overflow: 'hidden' }}>
@@ -741,9 +799,16 @@ export default function VoiceOrb({ patientId = '0047', dayPostOp = 1 }) {
                   </div>
 
                   {orbState === 'listening' && (
-                    <button className="btn btn-primary" style={{ width: '100%', marginBottom: 16 }} onClick={stopAndAdvance}>
-                      {qIndex < QUESTIONS.length - 1 ? `Next → (${QUESTIONS.length - qIndex - 1} left)` : 'Finish & Analyze'}
-                    </button>
+                    <div style={{ display: 'flex', gap: '8px', width: '100%', marginBottom: 16 }}>
+                      {qIndex > 0 && (
+                        <button className="btn btn-ghost" style={{ flex: 1 }} onClick={handlePreviousQuestion}>
+                          ← Back
+                        </button>
+                      )}
+                      <button className="btn btn-primary" style={{ flex: 2, background: 'linear-gradient(135deg, #00c9a8, #00e5c3)', color: '#040d18', border: 'none', borderRadius: '10px', fontWeight: '700', fontSize: '0.82rem', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 16px rgba(0,229,195,0.3)' }} onClick={stopAndAdvance}>
+                        {qIndex < QUESTIONS.length - 1 ? `Next → (${QUESTIONS.length - qIndex - 1} left)` : 'Finish & Analyze'}
+                      </button>
+                    </div>
                   )}
                   {orbState === 'analyzing' && (
                     <div style={{ textAlign: 'center', padding: '20px 0 16px' }}>

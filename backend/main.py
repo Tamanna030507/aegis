@@ -37,8 +37,8 @@ async def _seed_demo_data_if_empty():
         count = db.query(Patient).count()
         if count == 0:
             log.info("Database empty — seeding Patient 47 demo data...")
-            from scripts.seed_demo import seed_patient_47
-            await seed_patient_47(db)
+            from scripts.seed_demo import seed_patient_0047
+            await seed_patient_0047(db)
             log.info("Patient 47 seeded successfully.")
     except Exception as e:
         log.error(f"Demo seeding failed (non-fatal): {e}")

@@ -174,7 +174,7 @@ body::after {
 
 /* ─── Page ─── */
 .page {
-  max-width: 540px; margin: 0 auto;
+  max-width: 1000px; margin: 0 auto;
   padding: 28px 20px 80px;
   position: relative; z-index: 1;
 }
@@ -572,4 +572,57 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
   .grid-2 { grid-template-columns: 1fr; }
   .grid-3 { grid-template-columns: 1fr 1fr; }
   .passport-card { padding: 20px; }
+}
+
+/* ─── Desktop Broadened Grid Dashboard Layouts ─── */
+.checkin-grid-layout, .passport-grid-layout, .motor-grid-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.history-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Passport Pane & Switcher Controls */
+.passport-pane-hidden {
+  display: none;
+}
+.passport-pane-visible {
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .checkin-grid-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 16px;
+    align-items: start;
+  }
+  .history-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
+    gap: 12px;
+  }
+  .passport-grid-layout {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  .passport-tab-switcher {
+    display: none !important;
+  }
+  .passport-pane-hidden, .passport-pane-visible {
+    display: block !important;
+  }
+  .motor-grid-layout {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 16px;
+    align-items: start;
+  }
 }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { api } from '../services/api';
 
 /* =========================================================
    STABLE DEFAULT TEST DATA
@@ -123,8 +124,8 @@ export default function Passport({
 
     setLoading(true);
 
-    mockApi
-      .getRisk(patientId, testData)
+    api
+      .getRisk(patientId)
       .then((r) => {
         if (!mounted) return;
 
@@ -141,14 +142,7 @@ export default function Passport({
     return () => {
       mounted = false;
     };
-  }, [
-    patientId,
-    testData.faceScore,
-    testData.breathRate,
-    testData.tremorScore,
-    testData.vocalScore,
-    testData.vocalJitter,
-  ]);
+  }, [patientId]);
 
   /* =========================================================
      PASSPORT GENERATOR
@@ -160,7 +154,7 @@ export default function Passport({
     setError(null);
 
     try {
-      const data = await mockApi.generatePassport(patientId, testData);
+      const data = await api.generatePassport(patientId);
 
       setPassport(data);
       setIsSignatureValid(true);
@@ -170,7 +164,7 @@ export default function Passport({
     } finally {
       setGenerating(false);
     }
-  }, [patientId, testData, generating]);
+  }, [patientId, generating]);
 
   /* =========================================================
      TAMPER SIM
@@ -269,8 +263,8 @@ export default function Passport({
     return (
       <div
         style={{
-          background: '#0a0e17',
-          color: '#f3f4f6',
+          background: 'var(--bg)',
+          color: 'var(--text)',
           minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
@@ -281,7 +275,7 @@ export default function Passport({
       >
         <div
           style={{
-            color: '#00e5c3',
+            color: 'var(--teal)',
             fontSize: '2rem',
             fontFamily: 'monospace',
           }}
@@ -291,7 +285,7 @@ export default function Passport({
 
         <p
           style={{
-            color: '#9ca3af',
+            color: 'var(--text2)',
             marginTop: 12,
             fontSize: '0.85rem',
           }}
@@ -308,18 +302,19 @@ export default function Passport({
   return (
     <div
       style={{
-        background: '#04080f',
-        color: '#e8f4ff',
+        background: 'var(--glass)',
+        color: 'var(--text)',
         padding: '16px',
         borderRadius: '16px',
-        border: '1px solid rgba(0,229,195,0.12)',
-        maxWidth: '480px',
+        border: '1px solid var(--border)',
+        maxWidth: '1000px',
         width: '100%',
         overflow: 'hidden',
         margin: '0 auto',
         fontFamily: 'system-ui, sans-serif',
         boxSizing: 'border-box',
         position: 'relative',
+        backdropFilter: 'blur(24px)',
       }}
     >
       {/* HEADER */}
@@ -327,7 +322,7 @@ export default function Passport({
         style={{
           marginBottom: 20,
           paddingBottom: '10px',
-          borderBottom: '1px solid rgba(0,229,195,0.15)',
+          borderBottom: '1px solid var(--border)',
         }}
       >
         <div
@@ -367,7 +362,7 @@ export default function Passport({
             fontSize: '1.4rem',
             fontWeight: 800,
             margin: '2px 0 0 0',
-            color: '#fff',
+            color: 'var(--text)',
           }}
         >
           Surgical Passport
@@ -375,7 +370,7 @@ export default function Passport({
 
         <p
           style={{
-            color: '#7aa4c4',
+            color: 'var(--text2)',
             fontSize: '0.72rem',
             margin: '4px 0 0 0',
             lineHeight: '1.4',
@@ -390,6 +385,7 @@ export default function Passport({
       {/* TAB SWITCHER */}
       {passport && (
         <div
+          className="passport-tab-switcher"
           style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
@@ -402,18 +398,18 @@ export default function Passport({
             style={{
               background:
                 activeTab === 'qr_view'
-                  ? '#0d1626'
-                  : '#080e1a',
+                  ? 'var(--bg3)'
+                  : 'var(--bg2)',
 
               color:
                 activeTab === 'qr_view'
-                  ? '#00e5c3'
-                  : '#7aa4c4',
+                  ? 'var(--teal)'
+                  : 'var(--text2)',
 
               border:
                 activeTab === 'qr_view'
-                  ? '1px solid rgba(0,229,195,0.3)'
-                  : '1px solid rgba(255,255,255,0.05)',
+                  ? '1px solid var(--border2)'
+                  : '1px solid var(--border)',
 
               padding: '8px 4px',
               borderRadius: '6px',
@@ -432,18 +428,18 @@ export default function Passport({
             style={{
               background:
                 activeTab === 'payload_view'
-                  ? '#0d1626'
-                  : '#080e1a',
+                  ? 'var(--bg3)'
+                  : 'var(--bg2)',
 
               color:
                 activeTab === 'payload_view'
-                  ? '#00e5c3'
-                  : '#7aa4c4',
+                  ? 'var(--teal)'
+                  : 'var(--text2)',
 
               border:
                 activeTab === 'payload_view'
-                  ? '1px solid rgba(0,229,195,0.3)'
-                  : '1px solid rgba(255,255,255,0.05)',
+                  ? '1px solid var(--border2)'
+                  : '1px solid var(--border)',
 
               padding: '8px 4px',
               borderRadius: '6px',
@@ -459,16 +455,13 @@ export default function Passport({
         </div>
       )}
 
-      {/* QR VIEW */}
-      <div
-        style={{
-          display: activeTab === 'qr_view' ? 'block' : 'none',
-        }}
-      >
+      <div className={passport ? 'passport-grid-layout' : ''}>
+        {/* QR VIEW */}
+        <div className={activeTab === 'qr_view' ? 'passport-pane-visible' : 'passport-pane-hidden'}>
         <div
           style={{
-            background: '#080e1a',
-            border: '1px solid rgba(0,229,195,0.1)',
+            background: 'var(--bg2)',
+            border: '1px solid var(--border)',
             borderRadius: '12px',
             padding: '16px',
             textAlign: 'center',
@@ -493,23 +486,15 @@ export default function Passport({
                   borderRadius: '8px',
                   margin: '0 auto 14px',
                   display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: '4px',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
-                {qrBlocks.map((_, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      width: '18px',
-                      height: '18px',
-                      background:
-                        (i * 7 + (isTampered ? 3 : 0)) % 2 === 0
-                          ? '#000'
-                          : 'transparent',
-                    }}
-                  />
-                ))}
+                <img 
+                  src={`data:image/png;base64,${passport.qr_image_base64}`} 
+                  alt="Surgical Passport QR" 
+                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                />
 
                 {isTampered && (
                   <div
@@ -573,8 +558,9 @@ export default function Passport({
                     fontWeight: 700,
                     padding: '4px 10px',
                     borderRadius: '20px',
-                    background: 'rgba(255,255,255,0.05)',
-                    color: '#7aa4c4',
+                    background: 'var(--bg3)',
+                    color: 'var(--text2)',
+                    border: '1px solid var(--border)',
                   }}
                 >
                   Expires: {passport.expires_at}
@@ -584,17 +570,17 @@ export default function Passport({
               <p
                 style={{
                   fontSize: '0.62rem',
-                  color: '#3d6080',
+                  color: 'var(--text3)',
                   fontFamily: 'monospace',
                   wordBreak: 'break-all',
                   margin: '0 0 14px 0',
-                  background: '#04080f',
+                  background: 'var(--bg3)',
                   padding: '8px',
                   borderRadius: '6px',
                   width: '100%',
                   boxSizing: 'border-box',
                   border:
-                    '1px solid rgba(255,255,255,0.03)',
+                    '1px solid var(--border)',
                 }}
               >
                 HASH:{' '}
@@ -630,19 +616,19 @@ export default function Passport({
                   width: '140px',
                   height: '140px',
                   margin: '0 auto 16px',
-                  background: '#0d1626',
+                  background: 'var(--bg3)',
                   borderRadius: '12px',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
                   border:
-                    '2px dashed rgba(0,229,195,0.2)',
+                    '2px dashed var(--border2)',
                 }}
               >
                 <div
                   style={{
-                    color: '#3d6080',
+                    color: 'var(--text3)',
                     fontFamily: 'monospace',
                     fontSize: '0.75rem',
                   }}
@@ -683,19 +669,12 @@ export default function Passport({
       </div>
 
       {/* PAYLOAD VIEW */}
-      <div
-        style={{
-          display:
-            activeTab === 'payload_view'
-              ? 'block'
-              : 'none',
-        }}
-      >
+      <div className={activeTab === 'payload_view' ? 'passport-pane-visible' : 'passport-pane-hidden'}>
         {passport && (
           <div
             style={{
-              background: '#080e1a',
-              border: '1px solid rgba(0,229,195,0.1)',
+              background: 'var(--bg2)',
+              border: '1px solid var(--border)',
               borderRadius: '12px',
               padding: '12px',
               marginBottom: '16px',
@@ -713,7 +692,7 @@ export default function Passport({
                 style={{
                   fontSize: '0.72rem',
                   fontWeight: 800,
-                  color: '#fff',
+                  color: 'var(--text)',
                 }}
               >
                 Asynchronous Offline Extraction Registry
@@ -773,18 +752,18 @@ export default function Passport({
                 <div
                   key={idx}
                   style={{
-                    background: '#0d1626',
+                    background: 'var(--bg3)',
                     padding: '8px',
                     borderRadius: '6px',
                     border:
-                      '1px solid rgba(255,255,255,0.02)',
+                      '1px solid var(--border3)',
                   }}
                 >
                   <span
                     style={{
                       display: 'block',
                       fontSize: '0.58rem',
-                      color: '#7aa4c4',
+                      color: 'var(--text2)',
                       textTransform: 'uppercase',
                       letterSpacing: '0.5px',
                     }}
@@ -796,8 +775,8 @@ export default function Passport({
                     style={{
                       fontSize: '0.72rem',
                       color: isTampered
-                        ? '#ff4d6d'
-                        : '#fff',
+                        ? 'var(--red)'
+                        : 'var(--text)',
 
                       fontWeight: 600,
                       fontFamily: 'monospace',
@@ -817,8 +796,8 @@ export default function Passport({
       {/* RISK MATRIX */}
       <div
         style={{
-          background: '#080e1a',
-          border: '1px solid rgba(0,229,195,0.1)',
+          background: 'var(--bg2)',
+          border: '1px solid var(--border)',
           borderRadius: '12px',
           padding: '12px 14px',
         }}
@@ -829,7 +808,7 @@ export default function Passport({
             fontSize: '0.72rem',
             fontWeight: 800,
             textTransform: 'uppercase',
-            color: '#7aa4c4',
+            color: 'var(--text2)',
             letterSpacing: '0.5px',
             fontFamily: 'monospace',
           }}
@@ -855,13 +834,13 @@ export default function Passport({
                   borderBottom:
                     idx === arr.length - 1
                       ? 'none'
-                      : '1px solid rgba(255,255,255,0.04)',
+                      : '1px solid var(--border)',
                 }}
               >
                 <span
                   style={{
                     fontSize: '0.72rem',
-                    color: '#7aa4c4',
+                    color: 'var(--text2)',
                   }}
                 >
                   {label}
@@ -871,7 +850,7 @@ export default function Passport({
                   style={{
                     fontSize: '0.75rem',
                     fontWeight: 600,
-                    color: color || '#fff',
+                    color: color || 'var(--text)',
                     fontFamily: 'monospace',
                   }}
                 >
@@ -881,6 +860,7 @@ export default function Passport({
             )
           )}
         </div>
+      </div>
       </div>
 
       {/* ERROR */}
@@ -911,7 +891,7 @@ export default function Passport({
           <p
             style={{
               margin: 0,
-              color: '#e5e7eb',
+              color: 'var(--text)',
             }}
           >
             {error}
@@ -949,7 +929,7 @@ export default function Passport({
         <span
           style={{
             fontSize: '0.62rem',
-            color: '#3d6080',
+            color: 'var(--text3)',
             lineHeight: '1.3',
             textAlign: 'left',
           }}

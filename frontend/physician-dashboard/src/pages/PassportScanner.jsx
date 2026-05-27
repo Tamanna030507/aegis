@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PATIENTS, PATIENT_LIST } from '../data/patients';
+import { api } from '../services/api';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const RISK_COLOR = (r) =>
@@ -422,21 +423,61 @@ export default function PassportScanner() {
   const [scanning, setScanning]   = useState(false);
   const [scanDone, setScanDone]   = useState(false);
   const [hashInput, setHashInput] = useState('');
+  const [realScannedPatient, setRealScannedPatient] = useState(null);
 
-  const patient = selectedId ? PATIENTS[String(selectedId)] : null;
+  const patient = realScannedPatient || (selectedId ? PATIENTS[String(selectedId)] : null);
 
   const handleScan = (id) => {
+    setRealScannedPatient(null);
     setSelectedId(id);
     setScanning(true);
     setScanDone(false);
   };
 
-  const handleManualScan = () => {
-    // Map hash input to a patient, or default to 58 (critical)
-    const found = PATIENT_LIST.find(p =>
-      hashInput.includes(p.patient_id) || hashInput.includes(p.name.split(' ')[0].toLowerCase())
-    );
-    handleScan(found ? found.patient_id : '58');
+  const handleManualScan = async () => {
+    if (!hashInput.trim()) return;
+    setScanning(true);
+    setScanDone(false);
+    setSelectedId(null);
+    setRealScannedPatient(null);
+    
+    try {
+      const data = await api.scanPassport(hashInput.trim());
+      // data: { valid: true, patient_id: "0047", patient_name: "Arjun Mehta", payload: {...}, signed_by: "..." }
+      
+      const basePatient = PATIENTS[String(data.patient_id)] || PATIENTS['47'];
+      
+      const dynamicPatient = {
+        ...basePatient,
+        patient_id: data.patient_id,
+        name: data.patient_name,
+        procedure_type: data.payload?.procedure_type || basePatient.procedure_type,
+        procedure_date: data.payload?.procedure_date || basePatient.procedure_date,
+        robot_model: data.payload?.robot_model || basePatient.robot_model,
+        tissue_resistance_index: data.payload?.fingerprint?.tissue_resistance_index || basePatient.tissue_resistance_index,
+        suture_tension_score: data.payload?.fingerprint?.suture_tension_score || basePatient.suture_tension_score,
+        blood_loss_class: data.payload?.fingerprint?.blood_loss_class || basePatient.blood_loss_class,
+        healing_class: data.payload?.fingerprint?.healing_class || basePatient.healing_class,
+        anomaly_flags: data.payload?.fingerprint?.anomaly_flags || basePatient.anomaly_flags,
+        risk_multiplier: data.payload?.fingerprint?.procedure_risk_multiplier || basePatient.risk_multiplier,
+        passport: {
+          signed_by: data.signed_by,
+          tissue_resistance_index: data.payload?.fingerprint?.tissue_resistance_index || basePatient.tissue_resistance_index,
+          suture_tension_score: data.payload?.fingerprint?.suture_tension_score || basePatient.suture_tension_score,
+          blood_loss_class: data.payload?.fingerprint?.blood_loss_class || basePatient.blood_loss_class,
+          healing_class: data.payload?.fingerprint?.healing_class || basePatient.healing_class,
+          anomaly_flags: data.payload?.fingerprint?.anomaly_flags || basePatient.anomaly_flags,
+        }
+      };
+      
+      setRealScannedPatient(dynamicPatient);
+    } catch (e) {
+      console.error('Real passport scan failed, falling back to mock lookup:', e);
+      const found = PATIENT_LIST.find(p =>
+        hashInput.includes(p.patient_id) || hashInput.includes(p.name.split(' ')[0].toLowerCase())
+      );
+      handleScan(found ? found.patient_id : '58');
+    }
   };
 
   return (

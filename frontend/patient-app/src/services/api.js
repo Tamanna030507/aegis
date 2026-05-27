@@ -1,6 +1,4 @@
-// Use relative paths — Vite proxies /api/* to http://localhost:8000
-// This avoids CORS issues regardless of which port the frontend runs on.
-const BASE = '';
+const BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 async function request(path, options = {}) {
   const res = await fetch(`${BASE}${path}`, {
@@ -34,7 +32,7 @@ export const api = {
     form.append('patient_id', patientId);
     form.append('day_post_op', dayPostOp);
     form.append('file', file);
-    const res = await fetch('/api/checkins/wound', { method: 'POST', body: form });
+    const res = await fetch(`${BASE}/api/checkins/wound`, { method: 'POST', body: form });
     if (!res.ok) throw new Error(`Wound upload failed: ${res.status}`);
     return res.json();
   },
@@ -44,7 +42,7 @@ export const api = {
     form.append('patient_id', patientId);
     form.append('day_post_op', dayPostOp);
     form.append('file', audioBlob, 'voice.webm');
-    const res = await fetch('/api/checkins/voice', { method: 'POST', body: form });
+    const res = await fetch(`${BASE}/api/checkins/voice`, { method: 'POST', body: form });
     if (!res.ok) throw new Error(`Voice upload failed: ${res.status}`);
     return res.json();
   },

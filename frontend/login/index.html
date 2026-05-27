@@ -528,6 +528,15 @@
       <div class="divider"></div>
 
       <!-- Fields -->
+      <div class="field" id="name-field" style="display: none;">
+        <label>Full Name</label>
+        <svg class="field-icon" viewBox="0 0 18 18" fill="none">
+          <circle cx="9" cy="6" r="4" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M2 15c0-3.5 3.5-5 7-5s7 1.5 7 5" stroke="currentColor" stroke-width="1.4"/>
+        </svg>
+        <input type="text" id="fullname" placeholder="John Doe" autocomplete="name"/>
+      </div>
+
       <div class="field">
         <label>Email Address</label>
         <svg class="field-icon" viewBox="0 0 18 18" fill="none">
@@ -553,14 +562,24 @@
         </button>
       </div>
 
+      <div class="field" id="confirm-password-field" style="display: none;">
+        <label>Confirm Password</label>
+        <svg class="field-icon" viewBox="0 0 18 18" fill="none">
+          <rect x="3" y="8" width="12" height="9" rx="2" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M6 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.4"/>
+          <circle cx="9" cy="12.5" r="1.5" fill="currentColor"/>
+        </svg>
+        <input type="password" id="confirm-password" placeholder="••••••••••••" autocomplete="new-password"/>
+      </div>
+
       <div class="form-meta">
         <label class="remember">
           <input type="checkbox" id="remember-me"/> Remember me
         </label>
-        <a href="#" class="forgot">Forgot password?</a>
+        <a href="#" class="forgot" onclick="handleForgotPassword(event)">Forgot password?</a>
       </div>
 
-      <button class="btn-submit patient-btn" id="submit-btn" onclick="handleLogin(event)">
+      <button class="btn-submit patient-btn" id="submit-btn" onclick="handleSubmit(event)">
         Access Patient Portal
       </button>
 
@@ -574,7 +593,7 @@
       </div>
 
       <div class="signup-row">
-        New to AEGIS? <a href="#" onclick="showSignup()">Create account</a>
+        New to AEGIS? <a href="#" onclick="toggleMode(true)">Create account</a>
       </div>
     </div>
   </div>
@@ -592,6 +611,7 @@
   <span id="toast-msg">Success</span>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ─── Clock ───
 function tick(){
@@ -743,163 +763,263 @@ function drawECG(){
 }
 drawECG();
 
-// ─── Role selection ───
-let currentRole='patient';
+// ─── Supabase Initialization ───
+const { createClient } = supabase;
+const supabaseUrl = 'https://orxwpnbfdkynazcfwart.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yeHdwbmJmZGt5bmF6Y2Z3YXJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4ODQ1MDUsImV4cCI6MjA5NTQ2MDUwNX0.blCU8psNhPoHrYca3c24nYafzvXT0rcCik2L5JP43N8';
+const _supabase = createClient(supabaseUrl, supabaseKey);
 
-function selectRole(role){
-  currentRole=role;
-  document.querySelectorAll('.role-btn').forEach(b=>{
-    b.classList.toggle('active',b.dataset.role===role);
+// ─── Role selection ───
+let currentRole = 'patient';
+let isSignupMode = false;
+
+function toggleMode(signup) {
+  isSignupMode = signup;
+  const formTitle = document.getElementById('form-title');
+  const nameField = document.getElementById('name-field');
+  const confirmPwField = document.getElementById('confirm-password-field');
+  const metaRow = document.querySelector('.form-meta');
+  const submitBtn = document.getElementById('submit-btn');
+  const signupRow = document.querySelector('.signup-row');
+  
+  if (signup) {
+    formTitle.textContent = currentRole === 'patient' ? 'Patient Sign Up' : 'Physician Sign Up';
+    nameField.style.display = 'block';
+    confirmPwField.style.display = 'block';
+    metaRow.style.display = 'none';
+    submitBtn.textContent = currentRole === 'patient' ? 'Create Patient Account' : 'Create Physician Account';
+    signupRow.innerHTML = 'Already have an account? <a href="#" onclick="toggleMode(false)">Sign in</a>';
+  } else {
+    formTitle.textContent = currentRole === 'patient' ? 'Patient Sign In' : 'Physician Sign In';
+    nameField.style.display = 'none';
+    confirmPwField.style.display = 'none';
+    metaRow.style.display = 'flex';
+    submitBtn.textContent = currentRole === 'patient' ? 'Access Patient Portal' : 'Access Clinical Dashboard';
+    signupRow.innerHTML = 'New to AEGIS? <a href="#" onclick="toggleMode(true)">Create account</a>';
+  }
+}
+
+function selectRole(role) {
+  currentRole = role;
+  document.querySelectorAll('.role-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.role === role);
   });
 
-  const submitBtn=document.getElementById('submit-btn');
-  const formTitle=document.getElementById('form-title');
-  const accred=document.getElementById('accred-notice');
+  const submitBtn = document.getElementById('submit-btn');
+  const formTitle = document.getElementById('form-title');
+  const accred = document.getElementById('accred-notice');
 
-  if(role==='patient'){
-    submitBtn.className='btn-submit patient-btn';
-    submitBtn.textContent='Access Patient Portal';
-    formTitle.textContent='Patient Sign In';
-    accred.style.display='none';
+  if (role === 'patient') {
+    submitBtn.className = 'btn-submit patient-btn';
+    accred.style.display = 'none';
   } else {
-    submitBtn.className='btn-submit physician-btn';
-    submitBtn.textContent='Access Clinical Dashboard';
-    formTitle.textContent='Physician Sign In';
-    accred.style.display='block';
+    submitBtn.className = 'btn-submit physician-btn';
+    accred.style.display = 'block';
   }
 
+  toggleMode(isSignupMode);
+
   // Change input focus colors
-  document.querySelectorAll('.field input').forEach(el=>{
-    el.style.setProperty('--focus-color',role==='patient'?'#00e5c3':'#60a5fa');
+  document.querySelectorAll('.field input').forEach(el => {
+    el.style.setProperty('--focus-color', role === 'patient' ? '#00e5c3' : '#60a5fa');
   });
 }
 
 // ─── Password toggle ───
-let pwVisible=false;
-function togglePw(){
-  pwVisible=!pwVisible;
-  const inp=document.getElementById('password');
-  inp.type=pwVisible?'text':'password';
+let pwVisible = false;
+function togglePw() {
+  pwVisible = !pwVisible;
+  const inp = document.getElementById('password');
+  inp.type = pwVisible ? 'text' : 'password';
 }
 
 // ─── LocalStorage helpers ───
-function saveUser(email,role){
-  const users=JSON.parse(localStorage.getItem('aegis_users')||'{}');
-  if(!users[email]) users[email]={email,role,createdAt:new Date().toISOString()};
-  localStorage.setItem('aegis_users',JSON.stringify(users));
-  localStorage.setItem('aegis_session',JSON.stringify({email,role,loginAt:new Date().toISOString()}));
+function saveUser(email, role) {
+  const users = JSON.parse(localStorage.getItem('aegis_users') || '{}');
+  if (!users[email]) users[email] = { email, role, createdAt: new Date().toISOString() };
+  localStorage.setItem('aegis_users', JSON.stringify(users));
+  localStorage.setItem('aegis_session', JSON.stringify({ email, role, loginAt: new Date().toISOString() }));
 }
 
-function getUser(email){
-  const users=JSON.parse(localStorage.getItem('aegis_users')||'{}');
-  return users[email]||null;
-}
-
-function getSession(){
-  return JSON.parse(localStorage.getItem('aegis_session')||'null');
+function getSession() {
+  return JSON.parse(localStorage.getItem('aegis_session') || 'null');
 }
 
 // ─── Toast ───
-function showToast(msg,type='success'){
-  const toast=document.getElementById('toast');
-  document.getElementById('toast-msg').textContent=msg;
-  document.getElementById('toast-icon').textContent=type==='success'?'✓':'✕';
-  toast.className='toast '+type+' show';
-  setTimeout(()=>toast.classList.remove('show'),3500);
+function showToast(msg, type = 'success') {
+  const toast = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  document.getElementById('toast-icon').textContent = type === 'success' ? '✓' : '✕';
+  toast.className = 'toast ' + type + ' show';
+  setTimeout(() => toast.classList.remove('show'), 3500);
 }
 
 // ─── Loading ───
-function showLoading(msg){
-  document.getElementById('loader-msg').textContent=msg;
+function showLoading(msg) {
+  document.getElementById('loader-msg').textContent = msg;
   document.getElementById('loading').classList.add('show');
 }
-function hideLoading(){
+function hideLoading() {
   document.getElementById('loading').classList.remove('show');
 }
 
 // ─── Status messages ───
-const statusMessages=[
+const statusMessages = [
   'End-to-end encryption active · HIPAA compliant',
   'Gemini AI ready · Neural link established',
   'Federated nodes synced · 0 bytes exposed',
   'Surgical Passport verification ready',
   'Real-time monitoring armed',
 ];
-let si=0;
-setInterval(()=>{
-  si=(si+1)%statusMessages.length;
-  const el=document.getElementById('status-text');
-  el.style.opacity='0';
-  setTimeout(()=>{el.textContent=statusMessages[si];el.style.opacity='1';},300);
-},4000);
+let si = 0;
+setInterval(() => {
+  si = (si + 1) % statusMessages.length;
+  const el = document.getElementById('status-text');
+  el.style.opacity = '0';
+  setTimeout(() => { el.textContent = statusMessages[si]; el.style.opacity = '1'; }, 300);
+}, 4000);
 
 // ─── Ripple effect ───
-function createRipple(e,btn){
-  const rect=btn.getBoundingClientRect();
-  const r=document.createElement('span');
-  r.className='ripple';
-  const size=Math.max(btn.clientWidth,btn.clientHeight)*2;
-  r.style.cssText=`width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+function createRipple(e, btn) {
+  const rect = btn.getBoundingClientRect();
+  const r = document.createElement('span');
+  r.className = 'ripple';
+  const size = Math.max(btn.clientWidth, btn.clientHeight) * 2;
+  r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - rect.left - size / 2}px;top:${e.clientY - rect.top - size / 2}px`;
   btn.appendChild(r);
-  setTimeout(()=>r.remove(),600);
+  setTimeout(() => r.remove(), 600);
 }
 
-// ─── Login handler ───
-function handleLogin(e){
-  const btn=document.getElementById('submit-btn');
-  createRipple(e,btn);
+// ─── Submit handler (Login & Signup) ───
+async function handleSubmit(e) {
+  const btn = document.getElementById('submit-btn');
+  createRipple(e, btn);
 
-  const email=document.getElementById('email').value.trim();
-  const password=document.getElementById('password').value;
-  const remember=document.getElementById('remember-me').checked;
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const remember = document.getElementById('remember-me').checked;
 
-  // Validation
-  if(!email){showToast('Please enter your email address','error');return;}
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showToast('Please enter a valid email','error');return;}
-  if(!password||password.length<6){showToast('Password must be at least 6 characters','error');return;}
+  if (!email) { showToast('Please enter your email address', 'error'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('Please enter a valid email', 'error'); return; }
+  if (!password || password.length < 6) { showToast('Password must be at least 6 characters', 'error'); return; }
 
-  // Simulate auth
-  showLoading(currentRole==='patient'?'Authenticating patient...':'Verifying clinical credentials...');
+  if (isSignupMode) {
+    const fullName = document.getElementById('fullname').value.trim();
+    const confirmPw = document.getElementById('confirm-password').value;
+    if (!fullName) { showToast('Please enter your full name', 'error'); return; }
+    if (password !== confirmPw) { showToast('Passwords do not match', 'error'); return; }
 
-  setTimeout(()=>{
-    hideLoading();
+    showLoading('Creating your AEGIS account...');
+    try {
+      const patientId = `0047`; // Default demo patient ID so it links to the demo patient
+      const { data, error } = await _supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            role: currentRole,
+            patient_id: patientId
+          }
+        }
+      });
 
-    // Store user
-    saveUser(email,currentRole);
+      if (error) throw error;
 
-    if(remember){
-      localStorage.setItem('aegis_remember',JSON.stringify({email,role:currentRole}));
+      showToast('Registration successful! Please sign in.', 'success');
+      toggleMode(false);
+    } catch (err) {
+      showToast(err.message || 'Error creating account', 'error');
+    } finally {
+      hideLoading();
     }
+  } else {
+    showLoading(currentRole === 'patient' ? 'Authenticating patient...' : 'Verifying clinical credentials...');
+    try {
+      const { data, error } = await _supabase.auth.signInWithPassword({
+        email,
+        password
+      });
 
-    const dest=currentRole==='patient'
-      ?'http://localhost:3005'
-      :'http://localhost:3008';
+      if (error) throw error;
 
-    showToast(`Welcome back! Redirecting to ${currentRole==='patient'?'Patient App':'Clinical Dashboard'}...`,'success');
+      const userRole = data.user?.user_metadata?.role || 'patient';
+      if (userRole !== currentRole) {
+        await _supabase.auth.signOut();
+        throw new Error(`This account is registered as a ${userRole}, not a ${currentRole}.`);
+      }
 
-    setTimeout(()=>{
-  window.location.href = dest;
-}, 2000);
-  }, 2000);
+      saveUser(email, currentRole);
+
+      if (remember) {
+        localStorage.setItem('aegis_remember', JSON.stringify({ email, role: currentRole }));
+      }
+
+      showToast(`Welcome back! Redirecting to ${currentRole === 'patient' ? 'Patient App' : 'Clinical Dashboard'}...`, 'success');
+      
+      const dest = currentRole === 'patient'
+        ? 'http://localhost:3005'
+        : 'http://localhost:3008';
+
+      setTimeout(() => {
+        window.location.href = `${dest}/#access_token=${data.session.access_token}&refresh_token=${data.session.refresh_token}`;
+      }, 2000);
+    } catch (err) {
+      showToast(err.message || 'Authentication failed', 'error');
+    } finally {
+      hideLoading();
+    }
+  }
 }
 
-// ─── Signup modal stub ───
-function showSignup(){
-  showToast('Registration coming soon — contact your AEGIS administrator','error');
+// ─── Forgot Password handler ───
+async function handleForgotPassword(e) {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  if (!email) {
+    showToast('Please enter your email to reset password', 'error');
+    return;
+  }
+  showLoading('Sending password reset link...');
+  try {
+    const { error } = await _supabase.auth.resetPasswordForEmail(email);
+    if (error) throw error;
+    showToast('Password reset link sent to your email!', 'success');
+  } catch (err) {
+    showToast(err.message || 'Error sending reset link', 'error');
+  } finally {
+    hideLoading();
+  }
 }
 
-// ─── Auto-fill from remember-me ───
-(function(){
-  const remembered=JSON.parse(localStorage.getItem('aegis_remember')||'null');
-  if(remembered){
-    document.getElementById('email').value=remembered.email;
-    document.getElementById('remember-me').checked=true;
-    selectRole(remembered.role||'patient');
+// ─── Auto-redirect and initialization ───
+async function checkActiveSession() {
+  try {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (session && session.user) {
+      const role = session.user.user_metadata?.role || 'patient';
+      const dest = role === 'patient' ? 'http://localhost:3005' : 'http://localhost:3008';
+      showToast(`Active session found. Redirecting to ${role === 'patient' ? 'Patient App' : 'Clinical Dashboard'}...`, 'success');
+      setTimeout(() => {
+        window.location.href = dest;
+      }, 1500);
+    }
+  } catch (e) {
+    console.error('Session check failed:', e);
+  }
+}
+
+(function () {
+  const remembered = JSON.parse(localStorage.getItem('aegis_remember') || 'null');
+  if (remembered) {
+    document.getElementById('email').value = remembered.email;
+    document.getElementById('remember-me').checked = true;
+    selectRole(remembered.role || 'patient');
   }
 
-  const session=getSession();
-  if(session){
-    document.getElementById('status-text').textContent=
+  const session = getSession();
+  if (session) {
+    document.getElementById('status-text').textContent =
       `Last session: ${session.email} (${session.role}) · ${new Date(session.loginAt).toLocaleDateString()}`;
   }
 })();

@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { BrowserRouter, Routes, Route, NavLink, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
 import CheckIn from './pages/CheckIn';
 import WoundCamera from './pages/WoundCamera';
 import KeystrokeLive from './pages/KeystrokeLive';
 import Passport from './pages/Passport';
 import VoiceOrb from './pages/VoiceOrb';
+import { useAuth } from './hooks/useAuth';
 
 const PATIENT_ID  = '0047';
 const DAY_POST_OP = 5;
@@ -64,7 +65,80 @@ function ParticleCanvas() {
   return <canvas ref={ref} style={{ position: 'fixed', inset: 0, zIndex: 0, opacity: 0.45, pointerEvents: 'none' }} />;
 }
 
-function Nav({ theme, toggleTheme }) {
+function AuthGuard({ children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        backgroundColor: '#040d18',
+        color: '#00e5c3',
+        fontFamily: 'sans-serif'
+      }}>
+        <div style={{
+          width: '50px',
+          height: '50px',
+          borderRadius: '50%',
+          border: '2px solid rgba(0,229,195,0.15)',
+          borderTopColor: '#00e5c3',
+          animation: 'spin-auth 1s linear infinite'
+        }} />
+        <style dangerouslySetInnerHTML={{__html: `
+          @keyframes spin-auth { to { transform: rotate(360deg); } }
+        `}} />
+        <p style={{ marginTop: '20px', fontFamily: 'monospace', letterSpacing: '0.15em' }}>Loading AEGIS Session...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    window.location.href = import.meta.env.VITE_LOGIN_URL || "http://localhost:3007";
+    return null;
+  }
+
+  if (user.role !== 'patient') {
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        backgroundColor: '#040d18',
+        color: '#ff4d6d',
+        fontFamily: 'monospace',
+        textAlign: 'center',
+        padding: '20px'
+      }}>
+        <h2 style={{ marginBottom: '10px' }}>⚠️ ACCESS DENIED</h2>
+        <p>This portal is reserved for patients. Your account is registered as a {user.role}.</p>
+        <button 
+          onClick={() => { window.location.href = import.meta.env.VITE_LOGIN_URL || "http://localhost:3007" }}
+          style={{
+            marginTop: '20px',
+            padding: '10px 20px',
+            backgroundColor: '#ff4d6d',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer'
+          }}
+        >
+          Return to Login
+        </button>
+      </div>
+    );
+  }
+
+  return children;
+}
+
+function Nav({ theme, toggleTheme, user, logout }) {
   const [clock, setClock] = useState('');
   useEffect(() => {
     const tick = () => {
@@ -100,6 +174,11 @@ function Nav({ theme, toggleTheme }) {
 
       {/* Right strip */}
       <div className="nav-right">
+        {user && (
+          <span className="user-name-badge" style={{ fontSize: '0.8rem', color: '#00e5c3', border: '1px solid rgba(0,229,195,0.3)', padding: '4px 8px', borderRadius: '6px', background: 'rgba(0,229,195,0.05)', marginRight: '10px' }}>
+            👤 {user.name}
+          </span>
+        )}
         <div className="nav-status">
           <div className="status-dot" />
           <span>Live</span>
@@ -109,8 +188,53 @@ function Nav({ theme, toggleTheme }) {
         <button className="theme-toggle" onClick={toggleTheme} title="Toggle theme">
           {theme === 'dark' ? '☀️' : '🌙'}
         </button>
+        {user && (
+          <button 
+            className="logout-btn" 
+            onClick={logout} 
+            title="Sign Out" 
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              cursor: 'pointer', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              color: 'var(--text3)', 
+              transition: 'color 0.2s, transform 0.2s', 
+              marginLeft: '10px', 
+              padding: '4px' 
+            }} 
+            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--red)'; e.currentTarget.style.transform = 'translateX(2px)'; }} 
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text3)'; e.currentTarget.style.transform = 'none'; }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
+        )}
       </div>
     </nav>
+  );
+}
+
+function AuthWrapper({ theme, toggleTheme }) {
+  const { user, logout } = useAuth();
+  
+  return (
+    <AuthGuard>
+      <ParticleCanvas />
+      <Nav theme={theme} toggleTheme={toggleTheme} user={user} logout={logout} />
+      <Routes>
+        <Route path="/"          element={<CheckIn       patientId={user?.patient_id || PATIENT_ID} dayPostOp={DAY_POST_OP} />} />
+        <Route path="/wound"     element={<WoundCamera   patientId={user?.patient_id || PATIENT_ID} />} />
+        <Route path="/keystroke" element={<KeystrokeLive patientId={user?.patient_id || PATIENT_ID} />} />
+        <Route path="/passport"  element={<Passport      patientId={user?.patient_id || PATIENT_ID} />} />
+      </Routes>
+      <VoiceOrb patientId={user?.patient_id || PATIENT_ID} dayPostOp={DAY_POST_OP} />
+    </AuthGuard>
   );
 }
 
@@ -124,15 +248,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <ParticleCanvas />
-      <Nav theme={theme} toggleTheme={toggleTheme} />
-      <Routes>
-        <Route path="/"          element={<CheckIn       patientId={PATIENT_ID} dayPostOp={DAY_POST_OP} />} />
-        <Route path="/wound"     element={<WoundCamera   patientId={PATIENT_ID} />} />
-        <Route path="/keystroke" element={<KeystrokeLive patientId={PATIENT_ID} />} />
-        <Route path="/passport"  element={<Passport      patientId={PATIENT_ID} />} />
-      </Routes>
-      <VoiceOrb patientId={PATIENT_ID} dayPostOp={DAY_POST_OP} />
+      <AuthWrapper theme={theme} toggleTheme={toggleTheme} />
     </BrowserRouter>
   );
 }

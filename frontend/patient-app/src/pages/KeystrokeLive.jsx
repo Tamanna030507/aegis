@@ -31,6 +31,25 @@ const styles = `
     --font:     'Syne', sans-serif;
   }
 
+  [data-theme="light"] {
+    --bg:       #f0f6ff;
+    --bg2:      #e8f0fc;
+    --bg3:      #dde8f8;
+    --glass:    rgba(255, 255, 255, 0.85);
+    --border:   rgba(0, 190, 165, 0.2);
+    --border2:  rgba(0, 190, 165, 0.45);
+    --teal:     #009e88;
+    --teal2:    #00bfa5;
+    --red:      #e5364f;
+    --amber:    #d97706;
+    --blue:     #1d6fd8;
+    --purple:   #9b72a0;
+    --green:    #38a169;
+    --text:     #0f1d2e;
+    --text2:    #2d4a62;
+    --text3:    #5a7a96;
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   .ps-wrap {
@@ -53,7 +72,7 @@ const styles = `
 
   .ps-inner {
     position: relative; z-index: 1;
-    max-width: 520px; margin: 0 auto;
+    max-width: 1000px; margin: 0 auto;
     padding: 28px 18px 60px;
   }
 
@@ -109,7 +128,7 @@ const styles = `
   /* Progress bar for composite */
   .composite-bar {
     height: 6px; border-radius: 3px; overflow: hidden;
-    background: rgba(255,255,255,.06); margin-top: 14px;
+    background: var(--bg3); margin-top: 14px;
   }
   .composite-fill {
     height: 100%; border-radius: 3px;
@@ -231,8 +250,8 @@ const styles = `
 
   /* Tremor meter */
   .tremor-meter {
-    width:100%; height:10px; border-radius:5px;
-    background:rgba(255,255,255,.06); overflow:hidden; margin-top:8px;
+    width: 100%; height: 10px; border-radius: 5px;
+    background: var(--bg3); overflow: hidden; margin-top: 8px;
   }
   .tremor-fill {
     height:100%; border-radius:5px;
@@ -261,7 +280,7 @@ const styles = `
 
   /* Mini metric */
   .mini-metric {
-    background:rgba(255,255,255,.03); border:1px solid var(--border);
+    background:var(--bg3); border:1px solid var(--border);
     border-radius:10px; padding:10px 12px; text-align:center;
   }
   .mini-val { font-family:var(--mono); font-size:1rem; font-weight:700; color:var(--teal); }
@@ -269,7 +288,7 @@ const styles = `
 
   /* Scan progress */
   .scan-progress-wrap { margin:10px 0; }
-  .scan-prog-bar { height:3px; background:rgba(255,255,255,.06); border-radius:2px; overflow:hidden; }
+  .scan-prog-bar { height: 3px; background: var(--bg3); border-radius: 2px; overflow: hidden; }
   .scan-prog-fill { height:100%; background:var(--teal); border-radius:2px; transition:width .3s linear; }
   .scan-prog-label { font-family:var(--mono); font-size:.65rem; color:var(--text3); margin-top:4px; text-align:right; }
 
@@ -279,7 +298,7 @@ const styles = `
     display:flex; align-items:center; gap:5px;
     padding:4px 10px; border-radius:20px;
     font-family:var(--mono); font-size:.65rem;
-    background:rgba(255,255,255,.04); border:1px solid var(--border);
+    background:var(--bg3); border:1px solid var(--border);
     transition:all .3s;
   }
   .face-ind.lit { background:rgba(0,229,195,.1); border-color:rgba(0,229,195,.35); color:var(--teal); }
@@ -330,6 +349,31 @@ const styles = `
   .fade-up { animation:fadeUp .4s ease forwards; }
   .fade-up-2 { animation:fadeUp .4s .08s ease both; }
   .fade-up-3 { animation:fadeUp .4s .16s ease both; }
+
+  /* Desktop Broadened Layout Grids */
+  .ps-layout-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .sensors-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  @media (min-width: 768px) {
+    .ps-layout-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    .sensors-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+  }
 `;
 
 /* ─── HELPERS ─── */
@@ -342,7 +386,7 @@ function Ring({ value, max, color, size = 120, sw = 8, children }) {
   return (
     <div style={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
       <svg width={size} height={size} style={{ transform: "rotate(-90deg)", position: "absolute" }}>
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,.05)" strokeWidth={sw} />
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="var(--border)" strokeWidth={sw} />
         <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={sw}
           strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={offset}
           style={{ transition: "stroke-dashoffset 1s cubic-bezier(.34,1.56,.64,1), stroke .5s",
@@ -956,7 +1000,11 @@ export default function PainScanner() {
             </p>
           </div>
 
-          {/* ── Composite Score ── */}
+          <div className="ps-layout-grid">
+            
+            {/* COLUMN 1: DIAGNOSTIC OVERVIEW */}
+            <div>
+              {/* ── Composite Score ── */}
           <div className="score-card fade-up-2">
             <div className="score-top">
               <Ring value={compositeScore ?? 0} max={10} color={compositeColor} size={120} sw={8}>
@@ -992,6 +1040,10 @@ export default function PainScanner() {
               <div className="composite-fill" style={{ width:`${(compositeScore ?? 0) * 10}%`, background: compositeColor }} />
             </div>
           </div>
+          </div>
+
+          {/* COLUMN 2: CLINICAL SENSORS */}
+          <div className="sensors-grid">
 
           {/* ══════════════════════════════════════════
               SENSOR 1: FACIAL PAIN DETECTION
@@ -1288,6 +1340,9 @@ export default function PainScanner() {
                 {status.pupil === "done" ? "↺ Retest Pupil" : "👁️ Start Pupil Test (Needs camera)"}
               </button>
             )}
+          </div>
+
+          </div>
           </div>
 
           {/* ── Privacy ── */}
