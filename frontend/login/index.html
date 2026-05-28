@@ -763,6 +763,13 @@ function drawECG(){
 }
 drawECG();
 
+// ─── Aegis Deployment Configurations ───
+// To deploy to Vercel, update these URLs to point to your live Vercel domains
+const AEGIS_CONFIG = {
+  PATIENT_APP_URL: 'http://localhost:3005',
+  PHYSICIAN_DASHBOARD_URL: 'http://localhost:3008'
+};
+
 // ─── Supabase Initialization ───
 const { createClient } = supabase;
 const supabaseUrl = 'https://orxwpnbfdkynazcfwart.supabase.co';
@@ -958,8 +965,8 @@ async function handleSubmit(e) {
       showToast(`Welcome back! Redirecting to ${currentRole === 'patient' ? 'Patient App' : 'Clinical Dashboard'}...`, 'success');
       
       const dest = currentRole === 'patient'
-        ? 'http://localhost:3005'
-        : 'http://localhost:3008';
+        ? AEGIS_CONFIG.PATIENT_APP_URL
+        : AEGIS_CONFIG.PHYSICIAN_DASHBOARD_URL;
 
       setTimeout(() => {
         window.location.href = `${dest}/#access_token=${data.session.access_token}&refresh_token=${data.session.refresh_token}`;
@@ -998,7 +1005,9 @@ async function checkActiveSession() {
     const { data: { session } } = await _supabase.auth.getSession();
     if (session && session.user) {
       const role = session.user.user_metadata?.role || 'patient';
-      const dest = role === 'patient' ? 'http://localhost:3005' : 'http://localhost:3008';
+      const dest = role === 'patient'
+        ? AEGIS_CONFIG.PATIENT_APP_URL
+        : AEGIS_CONFIG.PHYSICIAN_DASHBOARD_URL;
       showToast(`Active session found. Redirecting to ${role === 'patient' ? 'Patient App' : 'Clinical Dashboard'}...`, 'success');
       setTimeout(() => {
         window.location.href = dest;
